@@ -36,15 +36,15 @@ public class Main {
     }
 
     static void isVowelOrConsonant(char character) {
-        boolean isBoldVovel = false;
+        boolean isBoldVowel = false;
         switch (character) {
             case 'a':
             case 'ı':
             case 'o':
             case 'u':
-                isBoldVovel = true;
+                isBoldVowel = true;
         }
-        if (isBoldVovel) {
+        if (isBoldVowel) {
             System.out.println(character + ": is a Bold Vowel");
         } else {
             System.out.println(character + ": is not a Bold Vowel");

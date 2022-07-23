@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<link rel='stylesheet' type='text/css' href='../Styles/Blueprint_Styles/Style.css' />
+<link rel="stylesheet" href="https://unpkg.com/@highlightjs/cdn-assets@11.5.0/styles/default.min.css">
+<script src="https://unpkg.com/@highlightjs/cdn-assets@11.5.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+<style type="text/css">
+    .syntaxhighlighter {
+        overflow-y: hidden !important;
+        overflow-x: auto !important;
+    }
+</style>    <title>easyWSDL - Tips & tricks</title>
+</head>
+<body>
+
+    <h2 id="basicAuthentication">Basic authentication</h2>
+
+    <p>
+        To implement a Basic authentication, you have to add a special http header to your service (before you invoke any methods). Here you have an example how to do this:
+    </p>
+    <pre>
+    <code class="java">
+SBKKPSPublicSoap service = new SBKKPSPublicSoap();
+service.httpHeaders.add(new HeaderProperty("Authorization", "Basic " +
+org.kobjects.base64.Base64.encode("user:password".getBytes())));
+service.TCKimlikNoDogrula();
+
+        </code>
+        </pre>
+    <br />
+    <br />
+    <h2 id="anyCollection">How to use any collection?</h2>
+    <p>
+        Some web services use &lt;any&gt; element to return/retrieve any type of data. The schema (structure) of these data is unknown so EasyWSDL are not able to generate a strongly typed
+        fields for them. Instead, there is one field any which is a collection of PropertyInfo objects and using it you can still retrieve or send such data in a raw format.
+        <strong>You can also add any collection to all generated classes by selecting <i>Generate All classes</i> in generator settings</strong>.
+        Use this feature only if you find that some elements are missing in the generated classes.
+        <br />
+        <br />
+        Here you will find example how to retrieve and send data using any collection.
+    </p>
+
+    <pre>
+    <code class="xml">
+&lt;n4:SearchGroups xmlns:n4="http://namespace.url/IBodyArchitectAccessService/"&gt;
+    &lt;n5:ExerciseSearchCriteriaGroup xmlns:n5="http://schemas.datacontract.org/2004/07/BodyArchitect.Service.V2.Model"&gt;
+        Global
+    &lt;/n5:ExerciseSearchCriteriaGroup&gt;
+&lt;/n4:SearchGroups&gt;
+        </code>
+</pre>
+    <br />
+    <br />
+    <h4>Sending custom value</h4>
+    <pre>
+    <code class="java">
+PartialRetrievingInfo info=new PartialRetrievingInfo();
+ExerciseSearchCriteria exerciseSearchCriteria = new ExerciseSearchCriteria();
+exerciseSearchCriteria.ExerciseTypes=new ArrayOfExerciseType();
+
+//begin of creating data for any collection
+PropertyInfo exerciseTypeAny = new PropertyInfo();
+exerciseTypeAny.name="SearchGroups";
+exerciseTypeAny.namespace="http://namespace.url/IBodyArchitectAccessService/";
+SoapObject obj = new SoapObject("http://schemas.datacontract.org/2004/07/BodyArchitect.Service.V2.Model","ExerciseSearchCriteriaGroup");
+exerciseTypeAny.setValue(obj);
+
+PropertyInfo inner = new PropertyInfo();
+inner.name="ExerciseSearchCriteriaGroup";
+inner.namespace="http://schemas.datacontract.org/2004/07/BodyArchitect.Service.V2.Model";
+inner.type= PropertyInfo.STRING_CLASS;
+inner.setValue("Global");
+obj.addProperty(inner);
+exerciseSearchCriteria.any.add(exerciseTypeAny);
+//end
+
+PagedResultOfExerciseDTO5oAtqRlh exercises = service.GetExercises(sessionData.Token, exerciseSearchCriteria, info);
+        </code>
+</pre>
+    <h4>Retrieving custom value</h4>
+<pre>
+    <code class="java">
+ProfileInformationDTO profileInfo=service.GetProfileInformation(sessionData.Token, criteria);
+for (PropertyInfo info : profileInfo.any)
+{
+  if(info.name.equals("Name"))
+  {
+    Object value=info.getValue();
+  }
+  else if(info.name.equals("Age"))
+  {
+    //...
+  }
+}
+        </code>
+</pre>
+    
+<p>In the latest generator we have introduced a feature to detect a strong types in <code>any</code> collections. To use this option, you have to set <code>CreateClassesForAny</code> property in you service class:</p>
+<pre><code class="java">service.CreateClassesForAny=true;</code></pre>
+<p>With this option, you should find your objects instead of raw <code>SoapObject</code> in <code>any</code> collection.</p>
+<div class="warningBox">
+    <h4>Important</h4>
+    If you still have raw <code>SoapObject</code> objects in <code>any</code> collection, you should generate classes with option <strong>Advanced settings -> Generate All classes</strong>.
+</div>
+<br />
+    <br />
+    <h2 id="bestPractices">Best practices</h2>
+    <p>
+        Sometimes you need to modify generated classes. The recommended way of doing it is to create a new class inherits from the generated class and make changes there (if possible of course). Using this you can easly regenerate
+        classes again without loosing your modifications.
+    </p>
+    <p>Here you find an example how to configure internal ksoap2 Transport class in your service class</p>
+
+    <pre>
+    <code class="java">
+public class MyService extends SBKKPSPublicSoap
+{
+    @Override
+    protected Transport createTransport() {
+    	//changing transport to HttpsTransportSE
+        Transport transport= new HttpsTransportSE(Proxy.NO_PROXY,url,500,"",timeOut);
+        transport.debug=true;
+        return transport;
+    }
+    @Override
+    protected ExtendedSoapSerializationEnvelope createEnvelope() {
+    	//configure envelope
+        ExtendedSoapSerializationEnvelope envelope= super.createEnvelope();
+        envelope.dotNet=true;
+        envelope.implicitTypes=false;
+        return envelope;
+    }
+    @Override
+    protected void sendRequest(String methodName, ExtendedSoapSerializationEnvelope envelope, Transport transport) throws Exception {
+        try{
+       	//here we want to print to output requestDump and responseDump after sending request to the server
+            super.sendRequest(methodName, envelope, transport);
+        }
+        catch (Exception e) {
+            throw e;
+        } finally {
+            if (transport.debug) {
+                if (transport.requestDump != null) {
+                    System.err.println(transport.requestDump);
+                }
+                if (transport.responseDump != null) {
+                    System.err.println(transport.responseDump);
+                }
+            }
+        }
+    }
+}
+        </code>
+</pre>
+    <p>Now to connect to your web service you should use MyService class instead of SBKKPSPublicSoap.</p>
+
+<br />
+<br />
+<h2 id="cookieManagement">How to set a cookie from the response (cookie management)?</h2>
+<p>
+    The easiest way is to maintain a cookies between requests is to use CookieManager class. Basically put these two lines at the start of your application
+</p>
+
+<pre>
+    <code class="java">
+    CookieManager cookieManager = new CookieManager();
+    CookieHandler.setDefault(cookieManager);
+    </code>
+</pre>
+
+<br />
+<br />
+<h2 id="dateTimeManagement">How to create custom Date/Time handler?</h2>
+<p>
+    If you find that easyWSDL classes handle date/time in a wrong way, you can create a custom provider. First step is to create a converter class, where you could override one or more methods:
+</p>
+
+<pre>
+    <code class="java">
+    public class MyCustomDateConverter extends StandardDateTimeConverter
+    {
+        @Override
+        public DateTime convertDateTime(String strDate) {
+            DateTimeFormatter parser1 = ISODateTimeFormat.dateTimeNoMillis();
+            return parser1.parseDateTime(strDate);
+        }
+    }
+    </code>
+</pre>
+<p>
+    Next is to create an instance of this class and set it into SBKExtendedSoapSerializationEnvelope. You need to do this before you connect to your webservice.
+</p>
+<pre>
+    <code class="java">
+    MyCustomDateConverter converter = new MyCustomDateConverter();
+    ExtendedSoapSerializationEnvelope.setDateTimeConverter(converter);
+    </code>
+</pre>
+</body>
+
+</html>
+

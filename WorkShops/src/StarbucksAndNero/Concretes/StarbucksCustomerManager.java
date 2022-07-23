@@ -3,9 +3,13 @@ package StarbucksAndNero.Concretes;
 import StarbucksAndNero.Entities.Customer;
 import StarbucksAndNero.MernisReferance.VDUKPSPublicSoap;
 
-import java.time.LocalDate;
-
 public class StarbucksCustomerManager extends BaseCustomerManager{
+public VDUKPSPublicSoap mernisService;
+    public StarbucksCustomerManager(VDUKPSPublicSoap service) {
+
+        mernisService=service;
+    }
+
     @Override
     public void Save(Customer customer) {
         super.Save(customer);
@@ -13,7 +17,6 @@ public class StarbucksCustomerManager extends BaseCustomerManager{
     }
 
     public boolean checkIfPersonReal(Customer customer) throws Exception {
-        VDUKPSPublicSoap mernisService = new VDUKPSPublicSoap();
         boolean result= mernisService.TCKimlikNoDogrula(Long.parseLong(customer.getNationalityId()),customer.getFirstName(),customer.getLastName(), customer.getDateOfBirth());
     return result;
     }

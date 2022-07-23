@@ -12,11 +12,12 @@ public class Main {
         goksel.setFirstName("Göksel");
         goksel.setLastName("Doğan");
         goksel.setDateOfBirth(1994);
-        goksel.setNationalityId("41010181261");
+        goksel.setId(3);
+        goksel.setNationalityId("21040181962");
 
         CustomerService neroCustomer = new NeroCustomerManager();
         neroCustomer.Save(goksel);
-        CustomerService starCustomer = new StarbucksCustomerManager();
+        CustomerService starCustomer = new StarbucksCustomerManager(new VDUKPSPublicSoap());
         if (((StarbucksCustomerManager) starCustomer).checkIfPersonReal(goksel)) {
             starCustomer.Save(goksel);
         } else {

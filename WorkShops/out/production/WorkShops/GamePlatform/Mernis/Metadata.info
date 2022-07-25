@@ -4,7 +4,7 @@
     <Version>6.0.1.1</Version>
     <AccountType>Basic</AccountType>
     <LibrariesFolder>easywsdl</LibrariesFolder>
-    <MainClass>SBGKPSPublicSoap</MainClass>
+    <MainClass>TUDKPSPublicSoap</MainClass>
   </Info>
   <Settings>
     <Url>https://tckimlik.nvi.gov.tr/Service/KPSPublic.asmx?WSDL</Url>
@@ -29,13 +29,13 @@
     <DetectDictionaries>false</DetectDictionaries>
   </Settings>
   <Files>
-    <File>SBGDateTimeConverter.java</File>
-    <File>SBGExtendedSoapSerializationEnvelope.java</File>
-    <File>SBGHelper.java</File>
-    <File>SBGKPSPublicSoap.java</File>
-    <File>SBGKPSPublicSoap12.java</File>
-    <File>SBGMarshalGuid.java</File>
-    <File>SBGStandardDateTimeConverter.java</File>
+    <File>TUDDateTimeConverter.java</File>
+    <File>TUDExtendedSoapSerializationEnvelope.java</File>
+    <File>TUDHelper.java</File>
+    <File>TUDKPSPublicSoap.java</File>
+    <File>TUDKPSPublicSoap12.java</File>
+    <File>TUDMarshalGuid.java</File>
+    <File>TUDStandardDateTimeConverter.java</File>
   </Files>
   <Libraries>
     <File>ExKsoap2-1.0.3.1.jar</File>

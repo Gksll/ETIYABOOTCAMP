@@ -46,7 +46,7 @@ public class Main {
         address1.setState("actually we have neighbours not  state!");
         address1.setPostalCode("just a numbers :)");
 
-        CustomerAddress customerAddress1 = new CustomerAddress(customer1,address1);
+        CustomerAddress customerAddress1 = new CustomerAddress(1,customer1,address1);
         customerAddress1.setId(1);
     }
 }

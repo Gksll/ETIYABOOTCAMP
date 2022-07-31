@@ -39,7 +39,5 @@ public class Permission {
 	public void setTitlePermissions(List<TitlePermission> titlePermissions) {
 		this.titlePermissions = titlePermissions;
 	}
-	
-	
 
 }
